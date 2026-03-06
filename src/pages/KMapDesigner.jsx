@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
-import { getKMapLayout, getMintermAt, minimizeKMap } from '../lib/kmap'
+import { getKMapLayout, minimizeKMap } from '../lib/kmap'
+import { minimizeWithGemini } from '../lib/geminiKmap'
 import { supabase } from '../lib/supabase'
 import KMapGrid from '../components/KMapGrid'
 import CircuitDiagram from '../components/CircuitDiagram'
@@ -21,6 +22,8 @@ export default function KMapDesigner() {
   const [cells, setCells] = useState(createEmptyCells(2, 2))
   const [result, setResult] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [minimizing, setMinimizing] = useState(false)
+  const [minimizeError, setMinimizeError] = useState(null)
 
   const layout = getKMapLayout(rows, cols)
 
@@ -40,9 +43,25 @@ export default function KMapDesigner() {
     setResult(null)
   }, [])
 
-  const handleMinimize = () => {
-    const { sop, pos } = minimizeKMap(cells, rows, cols)
-    setResult({ sop, pos })
+  const handleMinimize = async () => {
+    setMinimizing(true)
+    setMinimizeError(null)
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+      if (apiKey) {
+        const geminiResult = await minimizeWithGemini(cells, rows, cols)
+        setResult(geminiResult)
+      } else {
+        const { sop, pos } = minimizeKMap(cells, rows, cols)
+        setResult({ sop, pos })
+      }
+    } catch (err) {
+      setMinimizeError(err.message)
+      const { sop, pos } = minimizeKMap(cells, rows, cols)
+      setResult({ sop, pos })
+    } finally {
+      setMinimizing(false)
+    }
   }
 
   const handleSave = async () => {
@@ -112,14 +131,42 @@ export default function KMapDesigner() {
         <h2 className={styles.sectionTitle}>3. Minimize</h2>
         <button
           onClick={handleMinimize}
-          disabled={!hasOnes && !hasZeros}
+          disabled={(!hasOnes && !hasZeros) || minimizing}
           className={styles.minimizeBtn}
         >
-          Find Minimized Function
+          {minimizing ? 'Computing...' : import.meta.env.VITE_GEMINI_API_KEY ? 'Find Minimized Function (Gemini)' : 'Find Minimized Function'}
         </button>
+        {minimizeError && <p className={styles.error}>{minimizeError}</p>}
 
         {result && (
           <div className={styles.results}>
+            <div className={styles.visualizationSection}>
+              <h3>Essential Prime Implicants (Visualized)</h3>
+              <div className={styles.visualizationGrids}>
+                <div className={styles.vizBlock}>
+                  <h4>SOP</h4>
+                  <KMapGrid
+                    rows={rows}
+                    cols={cols}
+                    layout={layout}
+                    cells={cells}
+                    onCellChange={handleCellChange}
+                    highlightGroups={result.sop.essentialPrimeImplicantsWithMinterms || []}
+                  />
+                </div>
+                <div className={styles.vizBlock}>
+                  <h4>POS</h4>
+                  <KMapGrid
+                    rows={rows}
+                    cols={cols}
+                    layout={layout}
+                    cells={cells}
+                    onCellChange={handleCellChange}
+                    highlightGroups={result.pos.essentialPrimeImplicantsWithMinterms || []}
+                  />
+                </div>
+              </div>
+            </div>
             <div className={styles.resultBlock}>
               <h3>SOP (Sum of Products)</h3>
               <p className={styles.formula}>{result.sop.minimized || '—'}</p>

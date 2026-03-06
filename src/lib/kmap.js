@@ -6,6 +6,7 @@
 
 const GRAY_2 = [0, 1, 3, 2]  // 00, 01, 11, 10
 const VAR_NAMES = ['A', 'B', 'C', 'D']
+const OVERBAR = '\u0305'  // combining overline for NOT (Ā = Ā)
 
 export function getKMapLayout(rows, cols) {
   if (rows === 2 && cols === 2) {
@@ -237,19 +238,29 @@ function expandGroup(group, allMinterms, rows, cols) {
   return current
 }
 
+function wrappedSpan(indices, n) {
+  if (indices.length === 0) return 0
+  const sorted = [...new Set(indices)].sort((a, b) => a - b)
+  if (n === 2) return sorted.length
+  if (n === 4 && sorted.length > 0) {
+    const hasWrap = sorted[0] === 0 && sorted[sorted.length - 1] === n - 1
+    if (hasWrap) return sorted.length
+    return sorted[sorted.length - 1] - sorted[0] + 1
+  }
+  return sorted[sorted.length - 1] - sorted[0] + 1
+}
+
 function formsValidGroup(group, rows, cols) {
   const size = group.length
   if (size !== 1 && size !== 2 && size !== 4 && size !== 8) return false
   const coords = group.map(m => getMintermCoords(rows, cols, m))
-  const rs = coords.map(([r]) => r)
-  const cs = coords.map(([, c]) => c)
-  const minR = Math.min(...rs), maxR = Math.max(...rs)
-  const minC = Math.min(...cs), maxC = Math.max(...cs)
-  const h = maxR - minR + 1
-  const w = maxC - minC + 1
-  if (h * w !== size) return false
-  for (let r = minR; r <= maxR; r++) {
-    for (let c = minC; c <= maxC; c++) {
+  const rs = [...new Set(coords.map(([r]) => r))]
+  const cs = [...new Set(coords.map(([, c]) => c))]
+  const rowSpan = wrappedSpan(rs, rows)
+  const colSpan = wrappedSpan(cs, cols)
+  if (rowSpan * colSpan !== size) return false
+  for (const r of rs) {
+    for (const c of cs) {
       const m = getMintermAt(rows, cols, r, c)
       if (!group.includes(m)) return false
     }
@@ -274,9 +285,10 @@ function findGroupsSimplified(cells, rows, cols, target) {
   }
 
   const allPossibleGroups = []
+  const literalSep = target === 1 ? '·' : '+'
   const addGroup = (group) => {
     if (group.length >= 1 && (group.length & (group.length - 1)) === 0) {
-      const term = groupToTerm(group, varCount, target === 0)
+      const term = groupToTerm(group, varCount, target === 0, literalSep)
       if (term) {
         allPossibleGroups.push({ term, minterms: [...group], size: group.length })
       }
@@ -303,8 +315,19 @@ function findGroupsSimplified(cells, rows, cols, target) {
       }
     }
   }
-  if (targetMinterms.length === 8) {
-    if (formsValidGroup(targetMinterms, rows, cols)) addGroup(targetMinterms)
+  if (rows === 4 && cols === 4 && targetMinterms.length >= 8) {
+    const rowPairs = [[0, 1], [1, 2], [2, 3], [3, 0]]
+    const colPairs = [[0, 1], [1, 2], [2, 3], [3, 0]]
+    for (const [r1, r2] of rowPairs) {
+      const g = [0, 1, 2, 3].flatMap(c => [getMintermAt(4, 4, r1, c), getMintermAt(4, 4, r2, c)])
+      const valid = g.every(m => targetMinterms.includes(m)) && formsValidGroup(g, 4, 4)
+      if (valid) addGroup(g)
+    }
+    for (const [c1, c2] of colPairs) {
+      const g = [0, 1, 2, 3].flatMap(r => [getMintermAt(4, 4, r, c1), getMintermAt(4, 4, r, c2)])
+      const valid = g.every(m => targetMinterms.includes(m)) && formsValidGroup(g, 4, 4)
+      if (valid) addGroup(g)
+    }
   }
 
   const primeImplicants = []
@@ -350,26 +373,31 @@ function findGroupsSimplified(cells, rows, cols, target) {
 
   const terms = minCover.map(pi => pi.term)
   const formula = target === 1
-    ? terms.join(' + ')
-    : terms.map(t => `(${t})`).join(' · ')
+    ? terms.join(' + ')   // SOP: product terms ORed
+    : terms.map(t => `(${t})`).join(' · ')  // POS: sum terms ANDed
 
   return {
     primeImplicants: primeImplicants.map(pi => ({ term: pi.term, minterms: pi.minterms })),
     essentialPrimeImplicants: essential.map(e => e.term),
+    essentialPrimeImplicantsWithMinterms: essential.map(e => ({ term: e.term, minterms: e.minterms })),
     minimized: formula,
     terms,
   }
 }
 
-function groupToTerm(group, varCount, negate) {
+function literalWithNot(name, negated) {
+  return negated ? name + OVERBAR : name
+}
+
+function groupToTerm(group, varCount, negate, literalSep) {
   const binaries = group.map(m => mintermToBinary(m, varCount))
-  let result = ''
+  const literals = []
   for (let i = 0; i < varCount; i++) {
     const bits = binaries.map(b => b[i])
     const all0 = bits.every(b => b === '0')
     const all1 = bits.every(b => b === '1')
-    if (all0) result += negate ? VAR_NAMES[i] : '!' + VAR_NAMES[i]
-    if (all1) result += negate ? '!' + VAR_NAMES[i] : VAR_NAMES[i]
+    if (all0) literals.push(literalWithNot(VAR_NAMES[i], negate))
+    if (all1) literals.push(literalWithNot(VAR_NAMES[i], !negate))
   }
-  return result
+  return literals.join(literalSep || '')
 }

@@ -75,17 +75,31 @@
 }
 
 .cell {
+  position: relative;
   flex: 1;
-  min-width: 2.5rem;
-  min-height: 2.5rem;
-  padding: 0.5rem;
-  font-size: 1rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.35rem;
   font-family: 'JetBrains Mono', monospace;
-  font-weight: 600;
   border: none;
   border-left: 1px solid var(--border);
   cursor: pointer;
   transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+}
+
+.cellValue {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cellMinterm {
+  font-size: 0.6rem;
+  opacity: 0.85;
 }
 
 .cell:hover {
@@ -105,6 +119,17 @@
 .cellx {
   background: var(--cell-x);
   color: white;
+}
+
+.cellHighlight {
+  box-shadow: inset 0 0 0 3px var(--highlight-color);
+}
+
+.cellHighlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 .legend {
@@ -140,4 +165,21 @@
   background: var(--cell-x);
   border-radius: 4px;
   margin-right: 0.25rem;
+}
+
+.legendHighlight {
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border);
+}
+
+.legendGroup {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-tertiary);
+  border: 2px solid;
 }

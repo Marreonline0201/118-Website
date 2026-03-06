@@ -1,16 +1,53 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import styles from './Login.module.css'
 
-export default function Login() {
+export default function Login({ authError, onClearAuthError }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  // Show auth errors from URL (Supabase puts these in redirect on failure)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const hashParams = new URLSearchParams(window.location.hash.slice(1))
+    const err = params.get('error') || hashParams.get('error')
+    const desc = params.get('error_description') || hashParams.get('error_description')
+    if (err) {
+      setError(desc || err)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+  const supabaseCallback = supabaseUrl ? supabaseUrl.replace(/\/$/, '') + '/auth/v1/callback' : ''
+  const isGoogleRedirectError = authError === 'wrong_google_redirect' || (error && error.includes('Unable to exchange external code'))
+  const displayError = isGoogleRedirectError
+    ? (
+        <>
+          <strong>Wrong Google redirect URI.</strong> Google is sending the code to your app instead of Supabase.
+          <br /><br />
+          In <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Google Cloud Console → Credentials</a>, edit your OAuth 2.0 Client ID:
+          <br />
+          <strong>Remove</strong> any localhost or app URLs from Authorized redirect URIs.
+          <br />
+          <strong>Add only this:</strong>
+          <code className={styles.exactUri}>{supabaseCallback || 'https://YOUR-PROJECT.supabase.co/auth/v1/callback'}</code>
+          <br />
+          Save and wait 1–2 minutes, then try again.
+        </>
+      )
+    : error
 
   const handleGoogleLogin = async () => {
     setLoading(true)
     setError(null)
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/',
+        },
+      })
       if (error) throw error
     } catch (err) {
       setError(err.message)
@@ -40,9 +77,19 @@ export default function Login() {
           </svg>
           {loading ? 'Signing in...' : 'Continue with Google'}
         </button>
-        {error && <p className={styles.error}>{error}</p>}
+        {displayError && (
+          <p className={styles.error}>
+            {displayError}
+            {(authError || isGoogleRedirectError) && (
+              <button type="button" onClick={() => { setError(null); onClearAuthError?.() }} className={styles.dismiss}>Dismiss</button>
+            )}
+          </p>
+        )}
         <p className={styles.note}>
           Google login is required to save your K-map designs and view history.
+        </p>
+        <p className={styles.troubleshoot}>
+          Stuck after login? Add <code>{window.location.origin}/</code> to Supabase → Authentication → URL Configuration → Redirect URLs
         </p>
       </div>
     </div>

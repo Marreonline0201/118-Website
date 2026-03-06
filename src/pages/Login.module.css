@@ -64,10 +64,53 @@
   margin-top: 1rem;
   color: var(--error);
   font-size: 0.875rem;
+  text-align: left;
+}
+
+.error .dismiss {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error a {
+  color: var(--accent);
+}
+
+.error .exactUri {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  word-break: break-all;
 }
 
 .note {
   margin-top: 1.5rem;
   font-size: 0.8rem;
   color: var(--text-secondary);
+}
+
+.troubleshoot {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.9;
+}
+
+.troubleshoot code {
+  display: block;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  word-break: break-all;
 }

@@ -5,6 +5,8 @@
  */
 import styles from './CircuitDiagram.module.css'
 
+const OVERBAR = '\u0305'
+
 function parseTerms(expression, type) {
   if (!expression || expression === '—') return []
   if (type === 'SOP') {
@@ -13,24 +15,14 @@ function parseTerms(expression, type) {
   return expression.split('·').map(t => t.trim().replace(/^\(|\)$/g, '')).filter(Boolean)
 }
 
-function parseLiterals(term) {
-  const literals = []
-  let i = 0
-  while (i < term.length) {
-    if (term[i] === '!' || term[i] === '¬') {
-      i++
-      if (i < term.length) {
-        literals.push({ name: term[i], negated: true })
-        i++
-      }
-    } else if (/[A-D]/.test(term[i])) {
-      literals.push({ name: term[i], negated: false })
-      i++
-    } else {
-      i++
-    }
-  }
-  return literals
+function parseLiterals(term, type) {
+  const sep = type === 'SOP' ? '·' : '+'
+  const parts = term.split(sep).map(p => p.trim()).filter(Boolean)
+  return parts.map(p => {
+    const negated = p.endsWith(OVERBAR) || p.startsWith('!')
+    const name = (p.endsWith(OVERBAR) ? p.slice(0, -1) : p.replace(/^!/, '')).replace(OVERBAR, '')
+    return { name: name || /[A-D]/.exec(p)?.[0] || '?', negated }
+  })
 }
 
 export default function CircuitDiagram({ expression, type }) {
@@ -50,8 +42,7 @@ export default function CircuitDiagram({ expression, type }) {
 
   const Literal = ({ name, negated }) => (
     <div className={styles.literal}>
-      {negated && <span className={styles.not}>!</span>}
-      <span className={styles.input}>{name}</span>
+      <span className={styles.input}>{name}{negated ? OVERBAR : ''}</span>
     </div>
   )
 
@@ -67,7 +58,7 @@ export default function CircuitDiagram({ expression, type }) {
         </div>
         <div className={styles.terms}>
           {terms.map((term, ti) => {
-            const literals = parseLiterals(term)
+            const literals = parseLiterals(term, type)
             return (
               <div key={ti} className={styles.term}>
                 <div className={styles.termGate}>

@@ -1,0 +1,9 @@
+# Render Blueprint - ensures correct build configuration
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: kmap-circuit-designer
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
