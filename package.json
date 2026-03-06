@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "postinstall": "patch-package",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.44.0",
+    "@helander/quine-mccluskey-js": "^1.0.0",
     "@supabase/supabase-js": "^2.45.0",
     "@vitejs/plugin-react": "^4.3.3",
     "react": "^18.3.1",
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1"
+    "@types/react-dom": "^18.3.1",
+    "patch-package": "^8.0.1"
   }
 }

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { getKMapLayout, minimizeKMap } from '../lib/kmap'
-import { minimizeWithGemini } from '../lib/geminiKmap'
+import { minimizeWithQuineMcCluskey } from '../lib/quineMcCluskey'
 import { supabase } from '../lib/supabase'
 import KMapGrid from '../components/KMapGrid'
 import CircuitDiagram from '../components/CircuitDiagram'
@@ -43,22 +43,22 @@ export default function KMapDesigner() {
     setResult(null)
   }, [])
 
-  const handleMinimize = async () => {
+  const handleMinimize = () => {
     setMinimizing(true)
     setMinimizeError(null)
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-      if (apiKey) {
-        const geminiResult = await minimizeWithGemini(cells, rows, cols)
-        setResult(geminiResult)
-      } else {
-        const { sop, pos } = minimizeKMap(cells, rows, cols)
-        setResult({ sop, pos })
+      let resultData
+      try {
+        resultData = minimizeWithQuineMcCluskey(cells, rows, cols)
+        if (resultData.sop.minimized === '0' && resultData.pos.minimized === '0' && cells.some(c => c === 1 || c === 'x')) {
+          resultData = minimizeKMap(cells, rows, cols)
+        }
+      } catch (_) {
+        resultData = minimizeKMap(cells, rows, cols)
       }
+      setResult(resultData)
     } catch (err) {
       setMinimizeError(err.message)
-      const { sop, pos } = minimizeKMap(cells, rows, cols)
-      setResult({ sop, pos })
     } finally {
       setMinimizing(false)
     }
@@ -134,7 +134,7 @@ export default function KMapDesigner() {
           disabled={(!hasOnes && !hasZeros) || minimizing}
           className={styles.minimizeBtn}
         >
-          {minimizing ? 'Computing...' : import.meta.env.VITE_GEMINI_API_KEY ? 'Find Minimized Function (Gemini)' : 'Find Minimized Function'}
+          {minimizing ? 'Computing...' : 'Find Minimized Function'}
         </button>
         {minimizeError && <p className={styles.error}>{minimizeError}</p>}
 

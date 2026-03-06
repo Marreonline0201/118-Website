@@ -277,11 +277,21 @@ export function minimizeKMap(cells, rows, cols) {
 function findGroupsSimplified(cells, rows, cols, target) {
   const n = rows * cols
   const varCount = getVarCount(rows, cols)
-  const targetMinterms = []
+  const targetMinterms = []   // 1s and Xs for SOP; 0s and Xs for POS (all cells we can use in groups)
+  const requiredMinterms = [] // Only 1s for SOP, only 0s for POS (must be covered)
   for (let i = 0; i < n; i++) {
     const val = cells[i]
-    if (target === 1 && (val === 1 || val === 'x')) targetMinterms.push(i)
-    if (target === 0 && val !== 1 && val !== 'x') targetMinterms.push(i)
+    if (target === 1) {
+      if (val === 1 || val === 'x') targetMinterms.push(i)
+      if (val === 1) requiredMinterms.push(i)
+    } else {
+      if (val === 0) {
+        targetMinterms.push(i)
+        requiredMinterms.push(i)
+      } else if (val === 'x') {
+        targetMinterms.push(i)
+      }
+    }
   }
 
   const allPossibleGroups = []
@@ -350,7 +360,7 @@ function findGroupsSimplified(cells, rows, cols, target) {
   }
 
   const essential = []
-  for (const m of targetMinterms) {
+  for (const m of requiredMinterms) {
     const covering = primeImplicants.filter(pi => pi.minterms.includes(m))
     if (covering.length === 1) {
       if (!essential.find(e => e.term === covering[0].term)) {
@@ -360,15 +370,21 @@ function findGroupsSimplified(cells, rows, cols, target) {
   }
 
   const covered = new Set(essential.flatMap(e => e.minterms))
-  let needed = targetMinterms.filter(m => !covered.has(m))
+  let needed = requiredMinterms.filter(m => !covered.has(m))
   const minCover = [...essential]
-  for (const pi of primeImplicants.sort((a, b) => b.minterms.length - a.minterms.length)) {
-    if (essential.includes(pi)) continue
-    if (pi.minterms.some(m => needed.includes(m))) {
-      minCover.push(pi)
-      pi.minterms.forEach(m => covered.add(m))
-      needed = targetMinterms.filter(m => !covered.has(m))
-    }
+  const remaining = primeImplicants.filter(pi => !essential.includes(pi))
+  while (needed.length > 0) {
+    const best = remaining
+      .filter(pi => pi.minterms.some(m => needed.includes(m)))
+      .sort((a, b) => {
+        const aCovers = a.minterms.filter(m => needed.includes(m)).length
+        const bCovers = b.minterms.filter(m => needed.includes(m)).length
+        return bCovers - aCovers || b.minterms.length - a.minterms.length
+      })[0]
+    if (!best) break
+    minCover.push(best)
+    best.minterms.forEach(m => covered.add(m))
+    needed = requiredMinterms.filter(m => !covered.has(m))
   }
 
   const terms = minCover.map(pi => pi.term)
@@ -396,8 +412,8 @@ function groupToTerm(group, varCount, negate, literalSep) {
     const bits = binaries.map(b => b[i])
     const all0 = bits.every(b => b === '0')
     const all1 = bits.every(b => b === '1')
-    if (all0) literals.push(literalWithNot(VAR_NAMES[i], negate))
-    if (all1) literals.push(literalWithNot(VAR_NAMES[i], !negate))
+    if (all0) literals.push(literalWithNot(VAR_NAMES[i], !negate))
+    if (all1) literals.push(literalWithNot(VAR_NAMES[i], negate))
   }
   return literals.join(literalSep || '')
 }

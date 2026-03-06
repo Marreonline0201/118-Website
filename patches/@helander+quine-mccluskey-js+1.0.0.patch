@@ -1,0 +1,49 @@
+diff --git a/node_modules/@helander/quine-mccluskey-js/minterm.js b/node_modules/@helander/quine-mccluskey-js/minterm.js
+index 9cca771..99c6336 100644
+--- a/node_modules/@helander/quine-mccluskey-js/minterm.js
++++ b/node_modules/@helander/quine-mccluskey-js/minterm.js
+@@ -11,7 +11,7 @@ module.exports = class Minterm {
+         this.value = value;
+         this.used = false;
+ 
+-        this.values.sort(function(number1, number2) {return number1 > number2;});
++        this.values.sort(function(number1, number2) {return number1 - number2;});
+     }
+ 
+     /**
+diff --git a/node_modules/@helander/quine-mccluskey-js/quinemccluskey.js b/node_modules/@helander/quine-mccluskey-js/quinemccluskey.js
+index 8fb43c1..7661900 100644
+--- a/node_modules/@helander/quine-mccluskey-js/quinemccluskey.js
++++ b/node_modules/@helander/quine-mccluskey-js/quinemccluskey.js
+@@ -10,11 +10,11 @@ module.exports = class QuineMcCluskey {
+      * Creates a new QuineMcCluskey object to process the Quine-Mccluskey Algorithm
+      */
+     constructor(variables, values, dontCares = [], isMaxterm = false) {
+-        values.sort();
++        values.sort(function(a, b) {return a - b;});
+         this.variables = variables;
+         this.values = values;
+         this.allValues = values.concat(dontCares);
+-        this.allValues.sort();
++        this.allValues.sort(function(a, b) {return a - b;});
+         this.dontCares = dontCares;
+         this.isMaxterm = isMaxterm;
+         this.func = null;
+@@ -76,7 +76,7 @@ module.exports = class QuineMcCluskey {
+         let powerset = [];
+ 
+         // Iterate through decimal values from 1 to 2 ** size - 1
+-        for (let i = 1; i < 2 ** primeImplicants.length - 1; i++) {
++        for (let i = 1; i < 2 ** primeImplicants.length; i++) {
+             let currentset = [];
+ 
+             // Get the binary value of the decimal value
+@@ -107,7 +107,7 @@ module.exports = class QuineMcCluskey {
+                     }
+                 }
+             }
+-            tempValues.sort(function(number1, number2) {return number1 > number2;});
++            tempValues.sort(function(number1, number2) {return number1 - number2;});
+ 
+             // Check if this subset covers the rest of the values
+             if (tempValues.length == values.length &&
