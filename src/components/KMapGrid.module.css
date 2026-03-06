@@ -1,0 +1,143 @@
+.wrapper {
+  display: inline-block;
+}
+
+.gridContainer {
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.corner {
+  padding: 0.5rem;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+}
+
+.varLabel {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.colLabels {
+  display: flex;
+  background: var(--bg-tertiary);
+}
+
+.colLabel {
+  flex: 1;
+  min-width: 2.5rem;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  border-left: 1px solid var(--border);
+}
+
+.colLabel:first-child {
+  border-left: none;
+}
+
+.gridBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+
+.rowLabel {
+  min-width: 2.5rem;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-tertiary);
+  border-right: 1px solid var(--border);
+}
+
+.cells {
+  display: flex;
+}
+
+.cell {
+  flex: 1;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  border: none;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cell:hover {
+  filter: brightness(1.2);
+}
+
+.cell0 {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.cell1 {
+  background: var(--cell-1);
+  color: white;
+}
+
+.cellx {
+  background: var(--cell-x);
+  color: white;
+}
+
+.legend {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 1rem;
+}
+
+.legend0 {
+  display: inline-block;
+  width: 1.25rem;
+  text-align: center;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  margin-right: 0.25rem;
+}
+
+.legend1 {
+  display: inline-block;
+  width: 1.25rem;
+  text-align: center;
+  background: var(--cell-1);
+  border-radius: 4px;
+  margin-right: 0.25rem;
+}
+
+.legendX {
+  display: inline-block;
+  width: 1.25rem;
+  text-align: center;
+  background: var(--cell-x);
+  border-radius: 4px;
+  margin-right: 0.25rem;
+}

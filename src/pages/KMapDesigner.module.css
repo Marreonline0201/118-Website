@@ -1,0 +1,153 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.sizeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.sizeBtn,
+.sizeActive {
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.sizeBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.sizeBtn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.sizeActive {
+  background: var(--accent);
+  color: white;
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.minimizeBtn {
+  padding: 0.75rem 1.5rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.minimizeBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.minimizeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.results {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.resultBlock {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.resultBlock h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+}
+
+.formula {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  color: var(--success);
+}
+
+.primeImplicants {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.primeImplicants ul {
+  margin-top: 0.5rem;
+  margin-left: 1.25rem;
+}
+
+.essential {
+  color: var(--warning);
+}
+
+.saveBtn {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background: var(--success);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.circuits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .circuits {
+    grid-template-columns: 1fr;
+  }
+}
+
+.circuitBlock {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.circuitBlock h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}

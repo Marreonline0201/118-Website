@@ -11,8 +11,10 @@ When finding the minimized function, indicate the necessary prime implicants als
 
 Design a circuit based on SOP and POS form.
 
+User must be able to see the history of what they did.
 
 
 
+Use Supabase for DB and Render for deploying
 
-Use Supabase for DB and Render for 
+add instructions to how to connect all the works.
