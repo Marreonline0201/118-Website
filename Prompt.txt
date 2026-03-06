@@ -1,0 +1,18 @@
+This website is to design a circuit based on K-map.
+
+Google login required
+
+The page should first let the users fill out the K-map
+User can set the size(maximum 4x4) and each boxes should indicate the minterm.
+if it's 3-variabl k-map, draw A\BC k-map.
+if it's 4-variable k-map, draw a AB\CD k-map.
+After filing out the k-map, find the minimized function in SOP and POS form and show the user.
+When finding the minimized function, indicate the necessary prime implicants also.
+
+Design a circuit based on SOP and POS form.
+
+
+
+
+
+Use Supabase for DB and Render for 
